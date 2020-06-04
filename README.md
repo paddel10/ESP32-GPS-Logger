@@ -1,4 +1,4 @@
-Logging GPS data to a SD card. Additional button press stores current location in a separate file as a point of interest (POI). The GPS data stored as a NMEA sentence.
+Logging GPS data to a SD card. Additional button press stores current location in a separate file as a point of interest (POI). GPS data is stored as a NMEA sentence.
 
 | Component | Purpose |
 | -------- |-------------|
