@@ -15,7 +15,7 @@
 
 // gps module
 SoftwareSerial GPSModule(RXD2, TXD2);
-String lastPosition;
+String lastPosition = "";
 int currLoopWait = 0;
 
 // nmea parser
@@ -29,81 +29,51 @@ int nmeaFileExists = 0;
 SdFat sd;
 SdFile logFile;
 String currentFilename;
+String dateTimeStr = "";
 int filenameNr = 0;
 #define error(msg) {sd.errorPrint(&Serial, F(msg));fatalBlink();}
 
 // waypoint 
 #define WAYPOINT_LED_PIN 2
-#define WAYPOINT_BTN_PIN 26
+#define WAYPOINT_BTN_PIN 27
 EasyButton waypointButton(WAYPOINT_BTN_PIN);
 
+/**
+ * after a fatal error this function is called which never ends.
+ * button led is toggled.
+ */
 void fatalBlink() {
-  while (true) {
-    SysCall::yield();
-    digitalWrite(WAYPOINT_LED_PIN, HIGH);
-    delay(200);
-    digitalWrite(WAYPOINT_LED_PIN, LOW);
-    delay(200);
-  }
+    while (true) {
+        SysCall::yield();
+        digitalWrite(WAYPOINT_LED_PIN, HIGH);
+        delay(200);
+        digitalWrite(WAYPOINT_LED_PIN, LOW);
+        delay(200);
+    }
 }
 
+void trippleBlink() {
+    for (int i = 0; i < 6; i++) {
+        digitalWrite(WAYPOINT_LED_PIN, HIGH);
+        delay(100);
+        digitalWrite(WAYPOINT_LED_PIN, LOW);
+        delay(100);
+    }
+}
+
+/**
+ * toggles button led
+ */
 void toggleWaypointLed()
 {
-    // digitalWrite(WAYPOINT_LED_PIN, !digitalRead(WAYPOINT_LED_PIN));
     digitalWrite(WAYPOINT_LED_PIN, HIGH);
     delay(200);
     digitalWrite(WAYPOINT_LED_PIN, LOW);
 }
-// Write to the SD card
-/*void createFile(fs::FS &fs, const char * path) {
-    if (!nmeaFileExists) {
-        Serial.printf("Creating file: %s\n", path);
-        File file = fs.open(path, FILE_WRITE);
-        if(!file) {
-            Serial.println("Failed to open file for writing");
-            return;
-        }
-        file.close();
-        nmeaFileExists = 1;
-    }
-}*/
-// Append data to the SD card
-/*void appendFile(fs::FS &fs, const char* path, const char* message) {
-    Serial.printf("Appending to file: %s\n", path);
 
-    createFile(fs, path);
-
-    File file = fs.open(path, FILE_APPEND);
-    if (!file) {
-        Serial.println("Failed to open file for appending");
-        return;
-    }
-    if (file.print(message) && file.print("\r\n")) {
-        Serial.println("Message appended");
-    } else {
-        Serial.println("Append failed");
-    }
-    file.close();
-}*/
-
-/*void initSD() 
-{
-    SD.begin(SD_CS);  
-    if(!SD.begin(SD_CS)) {
-        Serial.println("Card Mount Failed");
-        return;
-    }
-    uint8_t cardType = SD.cardType();
-    if(cardType == CARD_NONE) {
-        Serial.println("No SD card attached");
-        return;
-    }
-    Serial.println("Initializing SD card...");
-    if (!SD.begin(SD_CS)) {
-        Serial.println("ERROR - SD card initialization failed!");
-        return;    // init failed
-    }
-}*/
+/**
+ * initialize the SD card
+ */
 void initSD()
 {
     if (!sdcardInitialized) {
@@ -118,44 +88,33 @@ void initSD()
     }
 }
 
-void appendFile(String filename, String sentence)
+/**
+ * append the given position to the given file. the file is
+ * created when it does not exist yet.
+ * system goes into panic mode if append fails.
+ **/
+void appendPositionToFile(String filename, String position)
 {
     if (sdcardInitialized) {
         // save position
         if (logFile.open(filename.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {
-            logFile.println(sentence);
+            logFile.println(position);
             logFile.flush();
             logFile.close();
             toggleWaypointLed();
-            Serial.println(sentence);
+            Serial.println(position);
         } else {
             logFile.sync();
             if (logFile.getWriteError()) {
                 error(String("*** error file.open >" + filename + "<").c_str());
             }
-            
-            /*Serial.println("could not open file for write");
-            currentFilename = filename + String("_") + String(filenameNr);
-            filenameNr++;*/
         }
-    
-        // save poi
-        /*String value = button.getValue();
-        String poiFilename = String("p") + filename;
-        if (value.length() > 0) {
-            if (logFile.open(poiFilename.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {
-                logFile.println(value);
-                logFile.flush();
-                logFile.close();
-                Serial.println("POI saved: " + value);
-                button.resetValue();
-            } else {
-                Serial.println("error opening " + poiFilename);
-            }
-        }*/
     }
 }
 
+/**
+ * flush previously logged data
+ **/
 void gpsHardwareReset()
 {
     Serial.println("Resetting GPS module ...");
@@ -177,6 +136,25 @@ void gpsHardwareReset()
     }
 }
 
+/**
+ * callback function when the waypoint button is pressed.
+ * checks if lastPosition is set and stores it in a separate file
+ **/
+void onButtonPressed() {
+    Serial.println("Waypoint button has been pressed!");
+    if (lastPosition.length() > 0) {
+        Serial.println("saving waypoint...");
+        appendPositionToFile(
+            String("p" + dateTimeStr + ".txt"), 
+            lastPosition
+        );
+        trippleBlink();
+    }
+}
+
+/**
+ * setup routines for gps, sd card, button class
+ */
 void setup() {
     Serial.begin(BAUD);
     Serial.println("MOSI: " + String(MOSI)); // system defined constants
@@ -197,18 +175,29 @@ void setup() {
     MicroNMEA::sendSentence(GPSModule, "$PORZB");
 
     // Send only RMC and GGA messages.
-      MicroNMEA::sendSentence(GPSModule, "$PORZB,RMC,1,GGA,1");
+    MicroNMEA::sendSentence(GPSModule, "$PORZB,RMC,1,GGA,1");
 
     // Disable compatability mode (NV08C-CSM proprietary message) and
     // adjust precision of time and position fields
     MicroNMEA::sendSentence(GPSModule, "$PNVGNME,2,9,1");
 
+    Serial.println("waybutton setup");
+    waypointButton.begin();
+    waypointButton.onPressed(onButtonPressed);
+
     Serial.println("setup() completed");
 }
 
+/**
+ * main loop. reads gps data if available and stores it in the
+ * attached sd card. only every MAX_LOOP_WAIT gps data is stored.
+ */
 void loop() {
     Serial.flush();
     GPSModule.flush();
+
+    // update internal button state
+    waypointButton.read();
 
     while (GPSModule.available() > 0) {
         char c = GPSModule.read();
@@ -217,14 +206,8 @@ void loop() {
             lastPosition = String(nmea.getSentence());
             if (nmea.getYear() >= YEAR_2020) {
                 if (currLoopWait % MAX_LOOP_WAIT == 0) {
-                    // String dateTimeStr = String(nmea.getYear()) + String(nmea.getMonth()) + String(nmea.getDay()) + String(nmea.getHour()) + String(nmea.getMinute()) + String(nmea.getSecond());
-                    String dateTimeStr = String(nmea.getYear()) + String(nmea.getMonth()) + String(nmea.getDay());
-                    /*appendFile(
-                        SD, 
-                        String("/" + filename + ".txt").c_str(), 
-                        lastPosition.c_str()
-                    );*/
-                    appendFile(
+                    dateTimeStr = String(nmea.getYear()) + String(nmea.getMonth()) + String(nmea.getDay());
+                    appendPositionToFile(
                         String(dateTimeStr + ".txt"), 
                         lastPosition
                     );
