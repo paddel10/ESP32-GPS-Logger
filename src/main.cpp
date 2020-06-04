@@ -52,6 +52,9 @@ void fatalBlink() {
     }
 }
 
+/**
+ * blink a couple of times
+ */
 void trippleBlink() {
     for (int i = 0; i < 6; i++) {
         digitalWrite(WAYPOINT_LED_PIN, HIGH);
