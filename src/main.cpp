@@ -74,6 +74,16 @@ void toggleWaypointLed()
     digitalWrite(WAYPOINT_LED_PIN, LOW);
 }
 
+void turnOnWaypointLed()
+{
+    digitalWrite(WAYPOINT_LED_PIN, HIGH);
+}
+
+void turnOffWaypointLed()
+{
+    digitalWrite(WAYPOINT_LED_PIN, LOW);
+}
+
 /**
  * initialize the SD card
  */
@@ -166,9 +176,11 @@ void setup() {
     Serial.println("SS: " + String(SS));
     Serial.println("GPS Txd2: " + String(TXD2));
 
+    pinMode(WAYPOINT_LED_PIN, OUTPUT);
+    turnOnWaypointLed();
+
     // sd card
     initSD();
-    pinMode(WAYPOINT_LED_PIN, OUTPUT);
 
     // prepare gps
     GPSModule.begin(GPS_BAUD);
@@ -206,6 +218,7 @@ void loop() {
         char c = GPSModule.read();
         
         if (nmea.process(c) && nmea.isValid()) {
+            turnOffWaypointLed();
             lastPosition = String(nmea.getSentence());
             if (nmea.getYear() >= YEAR_2020) {
                 if (currLoopWait % MAX_LOOP_WAIT == 0) {
