@@ -9,6 +9,9 @@ Logging GPS data to a SD card. Additional button press stores current location i
 
 TBD: Fritzing
 
+## Pins used on the ESP32 - Wroom32
+name, pin on board, pin in main.cpp
+
 ## Thirdparty Libraries
 | Name | Purpose | URL |
 | -------- |-------------| -------------|
