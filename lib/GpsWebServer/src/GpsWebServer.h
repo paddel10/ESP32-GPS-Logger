@@ -14,8 +14,10 @@ class GpsWebServer
 private:
     AsyncWebServer* m_pServer;
     const char* m_ssidPassword = "gpslogger123"; // yes, password is hardcoded
-    ParameterBag* m_pParameterBag;
     String m_ssid;
+
+public:
+    static ParameterBag* s_pParameterBag;
 
 private:
     String setupAccessPoint();
@@ -23,12 +25,11 @@ private:
     static String httpRequestProcessor(const String &var);
 
 public:
-
     GpsWebServer(ParameterBag* pParameterBag)
-    : m_pParameterBag(pParameterBag)
-    , m_ssid("")
+    : m_ssid("")
     {
         m_pServer = new AsyncWebServer(WEBSERVER_PORT);
+        s_pParameterBag = pParameterBag;
     }
     ~GpsWebServer() {}
     void init();

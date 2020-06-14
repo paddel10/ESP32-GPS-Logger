@@ -3,13 +3,14 @@
 #include <WiFi.h>
 #include <SPIFFS.h>
 
-ParameterBag* pBag;
+// static decleration
+ParameterBag* GpsWebServer::s_pParameterBag;
 
 String GpsWebServer::httpRequestProcessor(const String &var)
 {
-    Serial.println(var);
-    if (var == "SSID" && pBag) {
-        return pBag->getSsid();
+    Serial.println("httpRequestProcessor");
+    if (var == "SSID" && GpsWebServer::s_pParameterBag) {
+        return GpsWebServer::s_pParameterBag->getSsid();
     }
     return String();
 }
@@ -18,8 +19,6 @@ String GpsWebServer::httpRequestProcessor(const String &var)
 
 void GpsWebServer::init()
 {
-    pBag = m_pParameterBag;
-
     // mount file system
     Serial.println("Mounting file system ...");
     if (!SPIFFS.begin(true)) {
