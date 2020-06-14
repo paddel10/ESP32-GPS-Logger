@@ -65,13 +65,6 @@ void onButtonPressed() {
     }
 }
 
-
-String processor(const String &var)
-{
-    Serial.println("httpRequestProcessor() called: " + var);
-    return String();
-}
-
 /**
  * setup routines for gps, sd card, button class
  */
@@ -91,7 +84,7 @@ void setup() {
     // webserver
     pGpsWebServer = new GpsWebServer(pParameterBag);
     pGpsWebServer->init();
-    pGpsWebServer->setProcessor(processor);
+    pParameterBag->setSsid(pGpsWebServer->getSsid());
 
     // sd card
     pPositionStorage = new PositionStorage(SD_CS);

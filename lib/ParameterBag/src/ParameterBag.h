@@ -7,7 +7,8 @@ class ParameterBag
     long m_lastLat;
     long m_lastWaypointLong;
     long m_lastWaypointLat;
-    
+    String m_ssid;
+
 
 public:
     ParameterBag()
@@ -15,6 +16,7 @@ public:
     , m_lastLat(0)
     , m_lastWaypointLong(0)
     , m_lastWaypointLat(0)
+    , m_ssid("")
     {}
     ~ParameterBag() {}
     long getLastLong() { return m_lastLong; }
@@ -26,5 +28,8 @@ public:
     void setLastLat(long lastLat) { m_lastLat = lastLat; }
     void setLastWaypointLong(long lastWaypointLong) { m_lastWaypointLong = lastWaypointLong; }
     void setLastWaypointLat(long lastWaypointLat) { m_lastWaypointLat = lastWaypointLat; }
+
+    String getSsid() { return m_ssid; }
+    void setSsid(String ssid) { m_ssid = ssid; }
 };
 #endif

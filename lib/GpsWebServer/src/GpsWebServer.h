@@ -16,11 +16,11 @@ private:
     const char* m_ssidPassword = "gpslogger123"; // yes, password is hardcoded
     ParameterBag* m_pParameterBag;
     String m_ssid;
-    AwsTemplateProcessor* m_processor;
 
 private:
     String setupAccessPoint();
     void setupServer();
+    static String httpRequestProcessor(const String &var);
 
 public:
 
@@ -32,7 +32,6 @@ public:
     }
     ~GpsWebServer() {}
     void init();
-    void setProcessor(AwsTemplateProcessor processor) { m_processor = &processor; }
     String getSsid() { return m_ssid; }
 };
 

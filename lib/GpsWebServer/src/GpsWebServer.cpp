@@ -3,15 +3,23 @@
 #include <WiFi.h>
 #include <SPIFFS.h>
 
+ParameterBag* pBag;
 
-/*String httpRequestProcessor(const String &var)
+String GpsWebServer::httpRequestProcessor(const String &var)
 {
-    Serial.println("httpRequestProcessor() called: " + var);
+    Serial.println(var);
+    if (var == "SSID" && pBag) {
+        return pBag->getSsid();
+    }
     return String();
-}*/
+}
+
+// ----------------------------------------------------------------------
 
 void GpsWebServer::init()
 {
+    pBag = m_pParameterBag;
+
     // mount file system
     Serial.println("Mounting file system ...");
     if (!SPIFFS.begin(true)) {
@@ -48,9 +56,9 @@ String GpsWebServer::setupAccessPoint()
 
 void GpsWebServer::setupServer()
 {
-    m_pServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    m_pServer->on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
         Serial.println("request received.");
-        request->send(SPIFFS, "/index.html", String(), false, *m_processor);
+        request->send(SPIFFS, "/index.html", String(), false, this->httpRequestProcessor);
         // request->send(SPIFFS, "/index.html");
         // request->send(200, "text/plain", "Hello World");
     });
@@ -60,6 +68,6 @@ void GpsWebServer::setupServer()
         request->send(404);
     });
 
-    // server.serveStatic("/", SPIFFS, "/").setCacheControl("max-age=600");
+    (m_pServer->serveStatic("/", SPIFFS, "/")).setCacheControl("max-age=600");
     m_pServer->begin();
 }
