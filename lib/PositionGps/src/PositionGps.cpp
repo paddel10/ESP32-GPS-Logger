@@ -1,4 +1,5 @@
 #include "PositionGps.h"
+#include <SPI.h>
 
 #define GPS_BAUD 9600
 #define YEAR_2020 2020

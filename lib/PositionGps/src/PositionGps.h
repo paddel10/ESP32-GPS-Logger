@@ -31,11 +31,11 @@ private:
 
 public:
     PositionGps(int rxPin, int txPin)
-    : m_lastPosition(""),
-    m_lastPositionFilename(""),
-    m_lastWaypointFilename(""),
-    m_currLoopWait(0),
-    m_maxLoopWait(MAX_LOOP_WAIT)
+    : m_lastPosition("")
+    , m_lastPositionFilename("")
+    , m_lastWaypointFilename("")
+    , m_currLoopWait(0)
+    , m_maxLoopWait(MAX_LOOP_WAIT)
     {
         m_pNmea = new MicroNMEA(m_nmeaBuffer, sizeof(m_nmeaBuffer));
         m_pGpsModule = new SoftwareSerial(rxPin, txPin);
@@ -51,7 +51,6 @@ public:
     String getLastPositionFilename() { return m_lastPositionFilename; }
 
     String getLastWaypointFilename() { return m_lastWaypointFilename; }
-
 };
 
 #endif
