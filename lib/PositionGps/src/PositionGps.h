@@ -14,6 +14,8 @@ class PositionGps
     String m_lastPosition;
     String m_lastPositionFilename;
     String m_lastWaypointFilename;
+    long m_lastPositionLat;
+    long m_lastPositionLong;
     int m_currLoopWait;
     int m_maxLoopWait;
     // gps
@@ -34,6 +36,8 @@ public:
     : m_lastPosition("")
     , m_lastPositionFilename("")
     , m_lastWaypointFilename("")
+    , m_lastPositionLat(0)
+    , m_lastPositionLong(0)
     , m_currLoopWait(0)
     , m_maxLoopWait(MAX_LOOP_WAIT)
     {
@@ -47,6 +51,9 @@ public:
     int readPosition();
     
     String getLastPosition() { return m_lastPosition; }
+
+    long getLastPositionLat() { return m_lastPositionLat; }
+    long getLastPositionLong() { return m_lastPositionLong; }
 
     String getLastPositionFilename() { return m_lastPositionFilename; }
 

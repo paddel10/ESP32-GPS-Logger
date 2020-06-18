@@ -37,6 +37,8 @@ int PositionGps::readPosition()
         
         if (m_pNmea->process(c) && m_pNmea->isValid()) {
             m_lastPosition = String(m_pNmea->getSentence());
+            m_lastPositionLat = m_pNmea->getLatitude();
+            m_lastPositionLong = m_pNmea->getLongitude();
             Serial.println(m_lastPosition);
             if (m_pNmea->getYear() >= YEAR_2020) {
                 if (m_currLoopWait % MAX_LOOP_WAIT == 0) {

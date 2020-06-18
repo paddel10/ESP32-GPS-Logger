@@ -1,31 +1,13 @@
 #include "GpsWebServer.h"
 
 #include <WiFi.h>
-#include <SPIFFS.h>
+#include <WebPageHelper.h>
 
-// static decleration
-ParameterBag* GpsWebServer::s_pParameterBag;
-
-String GpsWebServer::httpRequestProcessor(const String &var)
-{
-    Serial.println("httpRequestProcessor");
-    if (var == "SSID" && GpsWebServer::s_pParameterBag) {
-        return GpsWebServer::s_pParameterBag->getSsid();
-    }
-    return String();
-}
-
-// ----------------------------------------------------------------------
+String GpsWebServer::m_sROOT_URI = "/";
+String GpsWebServer::m_sFILES_URI = "/files";
 
 void GpsWebServer::init()
 {
-    // mount file system
-    Serial.println("Mounting file system ...");
-    if (!SPIFFS.begin(true)) {
-        Serial.println("*** An Error has occurred while mounting SPIFFS");
-        return;
-    }
-
     Serial.println("Setting up access point ...");
     String apIpAddress = setupAccessPoint();
     Serial.println("AP IP address: " + apIpAddress);
@@ -55,18 +37,42 @@ String GpsWebServer::setupAccessPoint()
 
 void GpsWebServer::setupServer()
 {
-    m_pServer->on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
-        Serial.println("request received.");
-        request->send(SPIFFS, "/index.html", String(), false, this->httpRequestProcessor);
-        // request->send(SPIFFS, "/index.html");
-        // request->send(200, "text/plain", "Hello World");
+    m_pServer->on(m_sROOT_URI.c_str(), HTTP_GET, [this](AsyncWebServerRequest *request) {
+        Serial.println("on / received.");
+        request->send(200, "text/html", getDefaultPage());
     });
-  
+    m_pServer->on(m_sFILES_URI.c_str(), HTTP_GET, [this](AsyncWebServerRequest *request) {
+        Serial.println("on /files received.");
+        request->send(200, "text/html", getFilesPage());
+    });
     m_pServer->onNotFound([](AsyncWebServerRequest *request) {
         Serial.println("onNotFound() called");
         request->send(404);
     });
 
-    (m_pServer->serveStatic("/", SPIFFS, "/")).setCacheControl("max-age=600");
     m_pServer->begin();
+}
+
+// ----------------------------------------------------------------------
+
+String GpsWebServer::getDefaultPage()
+{
+    String content = String("<table>");
+    content += getTableRow("SSID", m_ssid);
+    content += getTableRow("Last Position (Lat/Long)", String(m_pParameterBag->getLastLat()) + "/" + String(m_pParameterBag->getLastLong()));
+    content += getTableRow("Last Waypoint (Lat/Long)", String(m_pParameterBag->getLastWaypointLat()) + "/" + String(m_pParameterBag->getLastWaypointLong()));
+    content += String("</table>");
+
+    String body = getPageBody("ESP32 - GPS Logger", content);
+
+    return getPageHeader("Files", m_sFILES_URI) + body + getPageFooter();
+}
+
+// ----------------------------------------------------------------------
+
+String GpsWebServer::getFilesPage()
+{
+    String content = m_pParameterBag->getFilesList();
+    String body = getPageBody("ESP32 - GPS Logger", content);
+    return getPageHeader("Home", m_sROOT_URI) + body + getPageFooter();
 }

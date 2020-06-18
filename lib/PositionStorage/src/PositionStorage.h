@@ -2,6 +2,7 @@
 #define _PositionStorage_h
 
 #include <Arduino.h>
+#define FS_NO_GLOBALS
 #include <SdFat.h>
 
 #define APPEND_POSITION_ERROR -1
@@ -18,7 +19,7 @@ class PositionStorage
     int m_sdcardInitialized = 0;
     int m_sdCsPin;
     SdFat* m_pSd;
-    SdFile* m_pLogFile;;
+    SdFile* m_pLogFile;
 
 public:
     PositionStorage(int sdCsPin)
@@ -46,6 +47,11 @@ public:
      * @return APPEND_POSITION_XXX
      **/
     int appendPosition(String filename, String position);
+
+    String getFilesAsHtmlTable();
+    String getCardSizeAsString();
+
+    // static void dateTime(uint16_t* date, uint16_t* time);
 };
 
 #endif

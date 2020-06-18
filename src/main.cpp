@@ -36,6 +36,8 @@ void handleAppendPositionRet(int ret)
 {
     switch (ret) {
         case APPEND_POSITION_SUCCESS:
+            pParameterBag->setLastWaypointLat(pPositionGps->getLastPositionLat());
+            pParameterBag->setLastWaypointLong(pPositionGps->getLastPositionLong());
             blinkLed.trippleBlink();
             break;
         case APPEND_POSITION_ERROR:
@@ -84,7 +86,6 @@ void setup() {
     // webserver
     pGpsWebServer = new GpsWebServer(pParameterBag);
     pGpsWebServer->init();
-    pParameterBag->setSsid(pGpsWebServer->getSsid());
 
     // sd card
     pPositionStorage = new PositionStorage(SD_CS);
@@ -97,6 +98,9 @@ void setup() {
     Serial.println("waybutton setup");
     waypointButton.begin();
     waypointButton.onPressed(onButtonPressed);
+
+    pParameterBag->setPositionGps(pPositionGps);
+    pParameterBag->setPositionStorage(pPositionStorage);
 
     Serial.println("setup() completed");
 }
