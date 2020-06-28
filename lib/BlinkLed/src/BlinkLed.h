@@ -1,6 +1,8 @@
 #ifndef _BlinkLed_h
 #define _BlinkLed_h
 
+#include <Arduino.h>
+
 class BlinkLed 
 {
     int m_ledPin;

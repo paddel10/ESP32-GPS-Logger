@@ -1,5 +1,4 @@
 #include "BlinkLed.h"
-#include <Arduino.h>
 
 void BlinkLed::init()
 {

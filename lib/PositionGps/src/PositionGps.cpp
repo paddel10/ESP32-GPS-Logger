@@ -1,5 +1,4 @@
 #include "PositionGps.h"
-#include <SPI.h>
 
 #define GPS_BAUD 9600
 #define YEAR_2020 2020
@@ -37,6 +36,7 @@ int PositionGps::readPosition()
         
         if (m_pNmea->process(c) && m_pNmea->isValid()) {
             m_lastPosition = String(m_pNmea->getSentence());
+            setLastPositionDateTime();
             m_lastPositionLat = m_pNmea->getLatitude();
             m_lastPositionLong = m_pNmea->getLongitude();
             Serial.println(m_lastPosition);
@@ -76,4 +76,29 @@ void PositionGps::gpsHardwareReset()
             }
         }
     }
+}
+
+// ----------------------------------------------------------------------
+
+void PositionGps::setLastPositionDateTime()
+{
+    String dateTime = String(m_pNmea->getYear());
+    dateTime += String("-");
+    dateTime += String(m_pNmea->getMonth());
+	dateTime += String("-");
+	dateTime += String(int(m_pNmea->getDay()));
+	dateTime += String(" ");
+	dateTime += String(int(m_pNmea->getHour()));
+	dateTime += String(':');
+	dateTime += String(int(m_pNmea->getMinute()));
+	dateTime += String(':');
+	dateTime += String(int(m_pNmea->getSecond()));
+    m_lastPositionDateTime = dateTime;
+}
+
+// ----------------------------------------------------------------------
+
+void PositionGps::setLastWaypointDateTime()
+{
+    m_lastWaypointDateTime = m_lastPositionDateTime;
 }

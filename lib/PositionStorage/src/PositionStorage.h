@@ -2,7 +2,7 @@
 #define _PositionStorage_h
 
 #include <Arduino.h>
-#define FS_NO_GLOBALS
+// #define FS_NO_GLOBALS
 #include <SdFat.h>
 
 #define APPEND_POSITION_ERROR -1
@@ -20,15 +20,21 @@ class PositionStorage
     int m_sdCsPin;
     SdFat* m_pSd;
     SdFile* m_pLogFile;
+    uint32_t m_totalFileSize;
 
 public:
     PositionStorage(int sdCsPin)
     : m_sdCsPin(sdCsPin)
+    , m_totalFileSize(0)
     {
         m_pSd = new SdFat();
         m_pLogFile = new SdFile();
     }
-    ~PositionStorage() {}
+    ~PositionStorage() {
+        // cleanup
+        if (m_pSd) delete m_pSd;
+        if (m_pLogFile) delete m_pLogFile;
+    }
 
     /**
      * initialize storage
@@ -49,9 +55,7 @@ public:
     int appendPosition(String filename, String position);
 
     String getFilesAsHtmlTable();
-    String getCardSizeAsString();
-
-    // static void dateTime(uint16_t* date, uint16_t* time);
+    String getTotalFileSizeInKb() { return String(m_totalFileSize / 1024) + String(" kB"); }
 };
 
 #endif

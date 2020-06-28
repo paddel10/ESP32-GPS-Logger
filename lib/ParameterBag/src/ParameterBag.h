@@ -24,11 +24,13 @@ public:
     void setPositionStorage(PositionStorage* pPositionStorage) { m_pPositionStorage = pPositionStorage; }
     long getLastLong() { return m_pPositionGps->getLastPositionLong(); }
     long getLastLat() { return m_pPositionGps->getLastPositionLat(); }
+    String getLastPositionDateTime() { return m_pPositionGps->getLastPositionDateTime(); }
 
     long getLastWaypointLong() { return m_lastWaypointLong; }
     long getLastWaypointLat() { return m_lastWaypointLat; }
     void setLastWaypointLong(long lastWaypointLong) { m_lastWaypointLong = lastWaypointLong; }
     void setLastWaypointLat(long lastWaypointLat) { m_lastWaypointLat = lastWaypointLat; }
+    String getLastWaypointDateTime() { return m_pPositionGps->getLastWaypointDateTime(); }
 
     String getFilesList() { return m_pPositionStorage->getFilesAsHtmlTable(); }
 };

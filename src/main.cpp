@@ -5,6 +5,9 @@
 #include <PositionGps.h>
 #include <GpsWebServer.h>
 #include <ParameterBag.h>
+#include <GpsBle.h>
+#include <ESP.h>
+#include <esp_spi_flash.h>
 
 #define BAUD 9600
 
@@ -32,6 +35,9 @@ BlinkLed blinkLed(WAYPOINT_LED_PIN);
 // webserver
 GpsWebServer* pGpsWebServer;
 
+// bluetooth low energy
+GpsBle* pGpsBle;
+
 void handleAppendPositionRet(int ret)
 {
     switch (ret) {
@@ -58,6 +64,7 @@ void onButtonPressed() {
     String lastPosition = pPositionGps->getLastPosition();
     if (lastPosition.length() > 0) {
         Serial.println("saving waypoint...");
+        pPositionGps->setLastWaypointDateTime();
         // lastWaypoint = lastPosition;
         int ret = pPositionStorage->appendPosition(
             pPositionGps->getLastWaypointFilename(), 
@@ -83,6 +90,16 @@ void setup() {
     blinkLed.init();
     blinkLed.turnOnLed();
 
+    // prepare bluetooth
+    Serial.println("bluetooth low energy (BLE) setup");
+    pGpsBle = new GpsBle();
+    pGpsBle->init();
+    #ifdef USE_BLE
+        Serial.println("BLE initilaized");
+    #else
+        Serial.println("BLE not available");
+    #endif
+
     // webserver
     pGpsWebServer = new GpsWebServer(pParameterBag);
     pGpsWebServer->init();
@@ -102,6 +119,22 @@ void setup() {
     pParameterBag->setPositionGps(pPositionGps);
     pParameterBag->setPositionStorage(pPositionStorage);
 
+    // chip info
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+    Serial.println("Hardware info");
+    Serial.printf("%d cores Wifi %s%s\n", chip_info.cores, (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
+    (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+    Serial.printf("Silicon revision: %d\n", chip_info.revision);
+    Serial.printf("%dMB %s flash\n", spi_flash_get_chip_size()/(1024*1024),
+    (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embeded" : "external");
+    
+    //get chip id
+    String chipId = String((uint32_t)ESP.getEfuseMac(), HEX);
+    chipId.toUpperCase();
+    
+    Serial.printf("Chip id: %s\n", chipId.c_str());
+    Serial.printf("Free heap: %d\n", esp_get_free_heap_size());
     Serial.println("setup() completed");
 }
 
@@ -118,12 +151,15 @@ void loop() {
     int ret = pPositionGps->readPosition();
 
     if (ret == POSITION_GPS_VALID) {
+        String value;
         ret = pPositionStorage->appendPosition(
             pPositionGps->getLastPositionFilename(),
             pPositionGps->getLastPosition()
         );
         switch (ret) {
             case APPEND_POSITION_SUCCESS:
+                value = String(pPositionGps->getLastPositionLat()) + String("/") + String(pPositionGps->getLastPositionLong());
+                pGpsBle->setValue(value);
                 blinkLed.toggleLed();
                 break;
             case APPEND_POSITION_ERROR:
