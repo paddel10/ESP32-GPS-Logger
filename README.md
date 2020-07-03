@@ -18,3 +18,9 @@ name, pin on board, pin in main.cpp
 | SdFat | Arduino FAT16/FAT32 Library | https://github.com/greiman/SdFat |
 | EasyButton | Arduino library for debouncing momentary contact switches | https://github.com/evert-arias/EasyButton |
 | MicroNMEA | A compact Arduino library to parse NMEA sentences | https://github.com/stevemarple/MicroNMEA |
+
+## Decoding stack trace after crash
+https://github.com/littleyoda/EspStackTraceDecoder
+```
+.pio\build\nodemcu-32s\firmware.elf
+```

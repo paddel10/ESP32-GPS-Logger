@@ -158,8 +158,10 @@ void loop() {
         );
         switch (ret) {
             case APPEND_POSITION_SUCCESS:
-                value = String(pPositionGps->getLastPositionLat()) + String("/") + String(pPositionGps->getLastPositionLong());
+                value = String(pPositionGps->getLastPositionLat()) + String("/") + 
+                    String(pPositionGps->getLastPositionLong());
                 pGpsBle->setValue(value);
+                pGpsBle->setValue(pPositionGps->getLastPositionDateTime());
                 blinkLed.toggleLed();
                 break;
             case APPEND_POSITION_ERROR:
