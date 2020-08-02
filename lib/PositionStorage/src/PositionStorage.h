@@ -56,6 +56,8 @@ public:
 
     String getFilesAsHtmlTable();
     String getTotalFileSizeInKb() { return String(m_totalFileSize / 1024) + String(" kB"); }
+    void deleteFile(String filename);
+    File getFileHandle(String filename);
 };
 
 #endif

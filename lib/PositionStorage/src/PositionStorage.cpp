@@ -69,7 +69,9 @@ String PositionStorage::getFilesAsHtmlTable()
     while (file.openNext(&root, O_RDONLY)) {
         if (!file.isHidden() && file.isFile() && file.getName(&filename[0], 13 * sizeof(char))) {
             String name = String(&filename[0]);
-            htmlTable += getTableRow(name, String(file.fileSize() / 1024) + String(" kB"));
+            String deleteLink = String("[<a href=\"delete?file=" + name + "\" onclick=\"return confirm('Delete file?');\">delete</a>] ");
+            String downloadLink = String("<a href=\"download?file=" + name + "\">") + name + String("</a>");
+            htmlTable += getTableRow(deleteLink + downloadLink, String(file.fileSize() / 1024) + String(" kB"), false);
             m_totalFileSize += file.fileSize();
         }
         file.close();
@@ -79,3 +81,19 @@ String PositionStorage::getFilesAsHtmlTable()
 
 // ----------------------------------------------------------------------
 
+void PositionStorage::deleteFile(String filename)
+{
+    bool bRet = m_pSd->remove(filename.c_str());
+    String status = "NOT deleted";
+    if (bRet) {
+        status = "deleted";
+    }
+    Serial.println(">" + filename + "< " + status);
+}
+
+// ----------------------------------------------------------------------
+
+File PositionStorage::getFileHandle(String filename)
+{
+    return m_pSd->open(filename.c_str(), O_RDONLY);
+}

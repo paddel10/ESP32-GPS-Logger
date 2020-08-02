@@ -33,5 +33,7 @@ public:
     String getLastWaypointDateTime() { return m_pPositionGps->getLastWaypointDateTime(); }
 
     String getFilesList() { return m_pPositionStorage->getFilesAsHtmlTable(); }
+    void deleteFile(String filename) { m_pPositionStorage->deleteFile(filename); }
+    File getFileHandle(String filename) { return m_pPositionStorage->getFileHandle(filename); }
 };
 #endif

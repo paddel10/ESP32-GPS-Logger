@@ -5,6 +5,8 @@
     // FS_NO_GLOBALS is used to avoid name collision with sdfat
     #define FS_NO_GLOBALS
     #include <ESPAsyncWebServer.h>
+#else
+    #include <ESP32WebServer.h>
 #endif
 #include <WiFi.h>
 #include <ParameterBag.h>
@@ -18,7 +20,7 @@ private:
 #ifdef USE_ASYNC
     AsyncWebServer* m_pServer;
 #else
-    WiFiServer* m_pServer;
+    ESP32WebServer* m_pServer;
 #endif
     const char* m_ssidPassword = "gpslogger123"; // yes, password is hardcoded
     ParameterBag* m_pParameterBag;
@@ -27,12 +29,18 @@ private:
     static String m_sROOT_URI;
     static String m_sFILES_URI;
     static String m_sWIFI;
+    static String m_sDOWNLOAD_FILE;
+    static String m_sDELETE_FILE;
 
 private:
     String setupAccessPoint();
     void setupServer();
     String getDefaultPage();
     String getFilesPage();
+    void downloadFile(String filename);
+    void deleteFile(String filename);
+    void sendHTML_Header();
+    void sendHTML_Stop();
 
 public:
     GpsWebServer(ParameterBag* pParameterBag)
@@ -42,7 +50,7 @@ public:
         #ifdef USE_ASYNC
             m_pServer = new AsyncWebServer(WEBSERVER_PORT);
         #else
-            m_pServer = new WiFiServer(WEBSERVER_PORT);
+            m_pServer = new ESP32WebServer(WEBSERVER_PORT);
         #endif
     }
     ~GpsWebServer() {

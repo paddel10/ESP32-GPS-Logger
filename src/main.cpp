@@ -145,6 +145,8 @@ void setup() {
 void loop() {
     Serial.flush();
 
+    pGpsWebServer->serveClient();
+
     // update internal button state
     waypointButton.read();
 

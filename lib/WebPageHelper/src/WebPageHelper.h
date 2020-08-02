@@ -3,13 +3,17 @@
 
 #include <Arduino.h>
 
-static String getTableRow(String key, String value)
+static String getTableRow(String key, String value, boolean strongKey = true)
 {
     String ret = String("<tr>");
     ret += String("<td>");
-    ret += String("<strong>");
+    if (strongKey) {
+        ret += String("<strong>");
+    }
     ret += key;
-    ret += String("</strong>");
+    if (strongKey) {
+        ret += String("</strong>");
+    }
     ret += String("</td>");
     ret += String("<td>");
     ret += value;
