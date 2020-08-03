@@ -152,7 +152,7 @@ void GpsWebServer::downloadFile(String filename)
     if (file) {
         uint32_t fileSize = file.size();
         Serial.println("downloading file! " + String(fileSize));
-        m_pServer->sendHeader("Content-Type", "text/text");
+        m_pServer->sendHeader("Content-Type", "application/octet-stream");
         m_pServer->sendHeader("Content-Disposition", "attachment; filename=" + filename);
         m_pServer->sendHeader("Connection", "close");
         if (m_pServer->streamFile(file, "application/octet-stream") != fileSize) {
