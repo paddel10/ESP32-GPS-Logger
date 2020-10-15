@@ -24,3 +24,5 @@ https://github.com/littleyoda/EspStackTraceDecoder
 ```
 java -jar EspStackTraceDecoder.jar C:\Users\<USER>\Documents\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\bin\xtensa-esp32-elf-addr2line.exe C:\Users\<USER>\Documents\GitHub\ESP32-GPS-Logger\.pio\build\nodemcu-32s\firmware.elf dump3.txt
 ```
+
+&copy; 2020
